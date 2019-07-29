@@ -1,10 +1,7 @@
-﻿import pygame
+import pygame
+from pygame.locals import *
 import sys
-import os
 pygame.init() # 初期化
-
-game_dir = os.path.dirname(__file__)
-img_dir = os.path.join(game_dir, "img")
 
 screen = pygame.display.set_mode((640,480))
 background = pygame.Surface(screen.get_size())
@@ -23,6 +20,11 @@ class Player(pygame.sprite.Sprite):
 
 	def draw(self):
 		screen.blit(self.image, self.rect)
+	def move():
+		keys = pygame.key.get_pressed()
+		if keys ==[K_UP]:
+			print("up")
+		
 
 class Enemy(pygame.sprite.Sprite):
 
@@ -37,21 +39,23 @@ class Enemy(pygame.sprite.Sprite):
 		screen.blit(self.image, self.rect)
 		
 def main():
-	mainloop = True
-	while mainloop:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				mainloop = False # pygame window closed by user
-			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:
-					mainloop = False # user pressed ESC
+	while True:
 		Player1 = Player(0, 0)
 		Enemy1 = Enemy(100,100,10)
 		Player1.draw()
 		Enemy1.draw()
+		Player1.move()
 		pygame.display.flip()
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_ESCAPE:
+					pygame.quit()
+					sys.exit()
 
 if __name__ == "__main__":
-    main()
+	main()
 
 		

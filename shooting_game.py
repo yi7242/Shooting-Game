@@ -2,7 +2,6 @@ import pygame
 from pygame.locals import *
 import sys
 pygame.init() # 初期化
-
 screen = pygame.display.set_mode((640,480))
 background = pygame.Surface(screen.get_size())
 background.fill((255,255,255))
@@ -16,26 +15,23 @@ class Player(pygame.sprite.Sprite):
 		self.image = pygame.image.load("./playerpic.png")
 		width = self.image.get_width()
 		height = self.image.get_height()
-		self.x = x
-		self.y = y
-		self.rect = Rect(self.x, self.y, width, height)
-
+		self.rect = pygame.Rect(x, y, 5, 7)
 	def draw(self):
 		screen.blit(self.image, self.rect)
 
 	
-	def move(self):
+	def move(self, speed = 3):
 		keys = pygame.key.get_pressed()
 		if keys[K_UP]:
-			self.y += 1
+			self.rect.y-= speed
 		if keys[K_DOWN]:
-			self.y -= 1
+			self.rect.y += speed
 		if keys[K_RIGHT]:
-			self.x += 1
+			self.rect.x += speed
 		if keys[K_LEFT]:
-			self.x -= 1
-		self.rect.move_ip(self.x, self.y)
-		self.rect = pygame.Rect.clamp()
+			self.rect.x -= speed
+		self.rect.clamp_ip(screen.get_rect())
+		
 class Enemy(pygame.sprite.Sprite):
 
 	def __init__(self, x, y, health = 100):
@@ -43,13 +39,19 @@ class Enemy(pygame.sprite.Sprite):
 		self.image = pygame.image.load("./enemypic.png")
 		width = self.image.get_width()
 		height = self.image.get_height()
-		self.rect = (x, y, width, height)
+		self.rect = pygame.Rect(x, y, width, height)
 
 	
 	def draw(self):
 		screen.blit(self.image, self.rect)
+
+class Bullet(pygame.sprite.Sprite):
+	def  __init__(self, bullet_speed = 10):
+		pygame.sprite.Sprite.__init__(self)
+		
 		
 def main():
+	pygame.display.set_caption("ShootingGame")
 	loop = True
 	Player1 = Player(0, 0)
 	Enemy1 = Enemy(100,100,10)
@@ -58,6 +60,7 @@ def main():
 		Player1.draw()
 		Enemy1.draw()
 		Player1.move()
+		print(Player1.rect.x, Player1.rect.y)
 		pygame.display.flip()
 		for event in pygame.event.get():
 			if event.type == QUIT:

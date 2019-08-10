@@ -18,6 +18,8 @@ class Player(pygame.sprite.Sprite):
 		self.rect = pygame.Rect(x, y, 5, 7)
 	def draw(self):
 		screen.blit(self.image, self.rect)
+	def aim(mouse_direction, confusion = False):
+		print("hello")
 
 	
 	def move(self, speed = 3):

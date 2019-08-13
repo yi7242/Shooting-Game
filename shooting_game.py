@@ -15,11 +15,12 @@ class Player(pygame.sprite.Sprite):
 		self.image = pygame.image.load("./playerpic.png")
 		width = self.image.get_width()
 		height = self.image.get_height()
-		self.rect = pygame.Rect(x, y, 5, 7)
+		self.rect = pygame.Rect(x, y, width, height)
+		print(width,height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
-	def aim(mouse_direction, confusion = False):
-		print("hello")
+	def aim(self, confusion = False):
+		self.image = pygame.transform.rotate(self.image, 20)
 
 	
 	def move(self, speed = 3):
@@ -62,7 +63,7 @@ def main():
 		Player1.draw()
 		Enemy1.draw()
 		Player1.move()
-		print(Player1.rect.x, Player1.rect.y)
+		Player1.aim()
 		pygame.display.flip()
 		for event in pygame.event.get():
 			if event.type == QUIT:

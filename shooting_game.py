@@ -20,12 +20,8 @@ class Player(pygame.sprite.Sprite):
 		print(width,height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
-	def aim(self,confusion = False):
+	def aim(self, rotation, confusion = False):
 		self.image = pygame.transform.rotate(pygame.image.load("./playerpic.png"), rotation)
-		rotation += 1
-		print(rotation)
-
-	
 	def move(self, speed = 3):
 		keys = pygame.key.get_pressed()
 		if keys[K_UP]:
@@ -61,14 +57,17 @@ def main():
 	loop = True
 	Player1 = Player(0, 0)
 	Enemy1 = Enemy(100,100,10)
-	rotation = 0
+	rotate = 0
 	while loop:
-
 		screen.blit(background,(0,0))
 		Player1.draw()
 		Enemy1.draw()
 		Player1.move()
-		Player1.aim(rotation)
+		Player1.aim(rotate)
+		rotate += 1
+		if rotate > 360:
+			rotate = rotate - 360
+		print(rotate)
 		pygame.display.flip()
 		for event in pygame.event.get():
 			if event.type == QUIT:

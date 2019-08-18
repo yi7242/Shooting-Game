@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import sys
+import math
 pygame.init() # 初期化
 screen = pygame.display.set_mode((640,480))
 background = pygame.Surface(screen.get_size())
@@ -20,7 +21,8 @@ class Player(pygame.sprite.Sprite):
 		print(width,height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
-	def aim(self, rotation, confusion = False):
+	def aim(self, confusion = False):
+		mouse_pos = pygame.mouse.get_pos()
 		self.image = pygame.transform.rotate(pygame.image.load("./playerpic.png"), rotation)
 	def move(self, speed = 3):
 		keys = pygame.key.get_pressed()
@@ -43,7 +45,6 @@ class Enemy(pygame.sprite.Sprite):
 		height = self.image.get_height()
 		self.rect = pygame.Rect(x, y, width, height)
 
-	
 	def draw(self):
 		screen.blit(self.image, self.rect)
 

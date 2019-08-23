@@ -18,12 +18,16 @@ class Player(pygame.sprite.Sprite):
 		width = self.image.get_width()
 		height = self.image.get_height()
 		self.rect = pygame.Rect(x, y, width, height)
-		print(width,height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
 	def aim(self, confusion = False):
 		mouse_pos = pygame.mouse.get_pos()
-		self.image = pygame.transform.rotate(pygame.image.load("./playerpic.png"), rotation)
+		sub_x = mouse_pos[0]-self.rect.x
+		sub_y = mouse_pos[1]-self.rect.y
+		angle = math.degrees(math.atan2(sub_x, sub_y))
+		print(angle)
+		angle = angle + 180
+		self.image = pygame.transform.rotate(pygame.image.load("./playerpic.png"), angle)
 	def move(self, speed = 3):
 		keys = pygame.key.get_pressed()
 		if keys[K_UP]:
@@ -49,26 +53,31 @@ class Enemy(pygame.sprite.Sprite):
 		screen.blit(self.image, self.rect)
 
 class Bullet(pygame.sprite.Sprite):
-	def  __init__(self, bullet_speed = 10):
+
+	def  __init__(self, x, y, bullet_speed = 10):
 		pygame.sprite.Sprite.__init__(self)
-		
+		self.image = pygame.surface.Surface((1,5))
+		self.image.fill(FF0000)
+		width = self.image.get_width()
+		height = self.image.get_height()
+		self.rect = pygame.Rect(x, y, width, height)
+	def draw():
+		screen.blit(self.image, self.rect)
 		
 def main():
 	pygame.display.set_caption("ShootingGame")
 	loop = True
 	Player1 = Player(0, 0)
 	Enemy1 = Enemy(100,100,10)
+	Testbullet = Bullet(100,100)
 	rotate = 0
 	while loop:
 		screen.blit(background,(0,0))
 		Player1.draw()
 		Enemy1.draw()
 		Player1.move()
-		Player1.aim(rotate)
-		rotate += 1
-		if rotate > 360:
-			rotate = rotate - 360
-		print(rotate)
+		Player1.aim()
+		Bullet.draw()
 		pygame.display.flip()
 		for event in pygame.event.get():
 			if event.type == QUIT:
@@ -81,4 +90,3 @@ def main():
 if __name__ == "__main__":
 	main()
 
-		

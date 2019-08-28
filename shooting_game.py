@@ -52,17 +52,6 @@ class Enemy(pygame.sprite.Sprite):
 		self.rect = pygame.Rect(x, y, width, height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
-	def nom_move(self):
-		if right:
-			self.rect.x += 1
-			if self.rect.x >= screensize[0]:
-				right = False
-		else:
-			self.rect.x -= 1
-			if self.rect.x <= screensize[0]:
-				right = True
-		self.rect.clamp_ip(screen.get_rect())
-		
 
 class Bullet(pygame.sprite.Sprite):
 
@@ -75,11 +64,14 @@ class Bullet(pygame.sprite.Sprite):
 		self.rect = pygame.Rect(x, y, width, height)
 	def draw(self):  #デバッグ用
 		screen.blit(self.image, self.rect)
-	def shoot(self, rectpos):
+	def shoot(self):
 		pygame.event.get()
 		mousestatus = pygame.mouse.get_pressed()
 		if mousestatus[0]:
-			screen.blit(self.image, rectpos)
+			screen.blit(self.image, (20,20))
+			
+
+			
 
 def main():
 	pygame.display.set_caption("ShootingGame") #初期設定
@@ -92,10 +84,9 @@ def main():
 		screen.blit(background,(0,0))
 		Player1.draw()
 		Enemy1.draw()
-		Enemy1.nom_move()
 		Player1.move()
 		Player1.aim()
-		Testbullet.draw()
+		Testbullet.shoot()
 		pygame.display.flip()
 		for event in pygame.event.get():
 			if event.type == QUIT:

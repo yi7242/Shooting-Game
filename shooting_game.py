@@ -10,6 +10,12 @@ background.fill((255,255,255))
 screen.blit(background,(0,0))
 background = background.convert()
 
+player_surface = pygame.Surface((25,42))
+player_surface.fill((255,255,255))
+player_rect = pygame.draw.polygon(player_surface, pygame.Color("green"),((0,42), (12.5,0), (25,0)))
+
+
+
 right = True
 class Player(pygame.sprite.Sprite):
 	
@@ -19,6 +25,7 @@ class Player(pygame.sprite.Sprite):
 		width = self.image.get_width()
 		height = self.image.get_height()
 		self.rect = pygame.Rect(x, y, width, height)
+		print(width,height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
 	def aim(self, confusion = False):
@@ -48,7 +55,6 @@ class Enemy(pygame.sprite.Sprite):
 		self.image.fill((255,255,0))
 		width = self.image.get_width()
 		height = self.image.get_height()
-		print(width,height)
 		self.rect = pygame.Rect(x, y, width, height)
 	def draw(self):
 		screen.blit(self.image, self.rect)
@@ -69,10 +75,6 @@ class Bullet(pygame.sprite.Sprite):
 		mousestatus = pygame.mouse.get_pressed()
 		if mousestatus[0]:
 			screen.blit(self.image, (20,20))
-			
-
-			
-
 def main():
 	pygame.display.set_caption("ShootingGame") #初期設定
 	loop = True
@@ -82,6 +84,7 @@ def main():
 	Testbullet = Bullet(50,50)
 	while loop:
 		screen.blit(background,(0,0))
+		screen.blit(player_surface, (200,200))
 		Player1.draw()
 		Enemy1.draw()
 		Player1.move()

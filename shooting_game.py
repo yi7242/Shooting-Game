@@ -10,13 +10,32 @@ background.fill((255,255,255))
 screen.blit(background,(0,0))
 background = background.convert()
 
-player_surface = pygame.Surface((25,42))
-player_surface.fill((255,255,255))
-player_rect = pygame.draw.polygon(player_surface, pygame.Color("green"),((0,42), (12.5,0), (25,0)))
-
-
+player_surface = pygame.Surface()
+player_rect = pygame.draw.polygon(player_surface, pygame.Color("green"),((0,42), (12.5,0), (25,42)))
 
 right = True
+
+def move(speed):
+	keys = pygame.key.get_pressed()
+	if keys[K_UP] or keys[K_w]:
+		player_rect.y-= speed
+	if keys[K_DOWN] or keys[K_s]:
+		player_rect.y += speed
+	if keys[K_RIGHT] or keys[K_d]:
+		player_rect.x += speed
+	if keys[K_LEFT] or keys[K_a]:
+		player_rect.x -= speed
+		print(player_rect.x,player_rect.y)
+		player_rect.clamp_ip(screen.get_rect())
+
+def aim():
+	mouse_pos = pygame.mouse.get_pos()
+		sub_x = mouse_pos[0]-player_rect.x
+		sub_y = mouse_pos[1]-player_rect.y
+		angle = math.degrees(math.atan2(sub_x, sub_y))
+		angle = angle + 180
+		 = pygame.transform.rotate(, angle)
+
 class Player(pygame.sprite.Sprite):
 	
 	def __init__(self, x, y, health=500):
@@ -35,17 +54,6 @@ class Player(pygame.sprite.Sprite):
 		angle = math.degrees(math.atan2(sub_x, sub_y))
 		angle = angle + 180
 		self.image = pygame.transform.rotate(pygame.image.load("./playerpic.png"), angle)
-	def move(self, speed = 1):
-		keys = pygame.key.get_pressed()
-		if keys[K_UP] or keys[K_w]:
-			self.rect.y-= speed
-		if keys[K_DOWN] or keys[K_s]:
-			self.rect.y += speed
-		if keys[K_RIGHT] or keys[K_d]:
-			self.rect.x += speed
-		if keys[K_LEFT] or keys[K_a]:
-			self.rect.x -= speed
-		self.rect.clamp_ip(screen.get_rect())
 		
 class Enemy(pygame.sprite.Sprite):
 
@@ -84,11 +92,11 @@ def main():
 	Testbullet = Bullet(50,50)
 	while loop:
 		screen.blit(background,(0,0))
-		screen.blit(player_surface, (200,200))
 		Player1.draw()
 		Enemy1.draw()
 		Player1.move()
 		Player1.aim()
+		move(1)
 		Testbullet.shoot()
 		pygame.display.flip()
 		for event in pygame.event.get():

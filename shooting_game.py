@@ -10,31 +10,39 @@ background = pygame.Surface(screen.get_size())
 background.fill((255, 255, 255))
 screen.blit(background, (0, 0))
 background = background.convert()
-
+global player_surface
 player_surface = pygame.Surface((25, 42))
 player_surface.fill((255, 255, 255))
 player_rect = pygame.draw.polygon(player_surface, pygame.Color("green"), ((0, 42), (12.5, 0), (25, 42)))
-
 right = True
 
 
-def move(speed):
+def move(speed, x, y):
     keys = pygame.key.get_pressed()
-    x,y =
     if keys[K_UP] or keys[K_w]:
-         -= speed
+        y -= speed
     if keys[K_DOWN] or keys[K_s]:
-        player_rect.y += speed
+        y += speed
     if keys[K_RIGHT] or keys[K_d]:
-        player_rect.x += speed
+        x += speed
     if keys[K_LEFT] or keys[K_a]:
-        player_rect.x -= speed
-    player_rect.clamp_ip(screen.get_rect())
+        x -= speed
+    if x > 615:
+        x = 615
+    if y > 438:
+        y = 438
+    if x < 0:
+        x = 0
+    if y < 0:
+        y = 0
+    print(x, y)
+    return x, y
 
-def aim():
+
+def aim(x, y):
     mouse_pos = pygame.mouse.get_pos()
-    sub_x = mouse_pos[0] - player_rect.x
-    sub_y = mouse_pos[1] - player_rect.y
+    sub_x = mouse_pos[0] - x
+    sub_y = mouse_pos[1] - y
     angle = math.degrees(math.atan2(sub_x, sub_y))
     angle = angle + 180
     spin_surface = pygame.transform.rotate(player_surface, angle)
@@ -68,11 +76,13 @@ class Bullet(pygame.sprite.Sprite):
     def draw(self):  # デバッグ用
         screen.blit(self.image, self.rect)
 
-    def shoot(self):
-        pygame.event.get()
-        mousestatus = pygame.mouse.get_pressed()
-        if mousestatus[0]:
-            screen.blit(self.image, (20, 20))
+    def shoot(self, x, y):
+        mouse_pos = pygame.mouse.get_pos()
+        sub_x = mouse_pos[0] - x
+        sub_y = mouse_pos[1] - y
+        angle = math.degrees(math.atan2(sub_x, sub_y))
+        
+
 
 
 def main():
@@ -81,25 +91,27 @@ def main():
 
     Enemy1 = Enemy(100, 100, 10)
     Testbullet = Bullet(50, 50)
+    px = 0
+    py = 0
     while loop:
         screen.blit(background, (0, 0))
-        player_surface = aim()
-        print(player_surface)
         Enemy1.draw()
-        move(1)
+        px, py = move(1, px, py)
+        spin_surface = aim(px, py)
+        screen.blit(spin_surface, (px, py))
         Testbullet.shoot()
-        screen.blit(player_surface, (0, 0))
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:
                 loop = False
-                pygame.quit()
+                exit()
                 sys.exit(0)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     loop = False
-                    pygame.quit()
+                    exit()
                     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

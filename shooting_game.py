@@ -77,12 +77,17 @@ class Bullet(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
     def shoot(self, x, y):
-        mouse_pos = pygame.mouse.get_pos()
-        sub_x = mouse_pos[0] - x
-        sub_y = mouse_pos[1] - y
-        angle = math.degrees(math.atan2(sub_x, sub_y))
-        
-
+        for event in pygame.event.get():
+            if event.type == MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = pygame.mouse.get_pos()
+                sub_x = mouse_pos[0] - x
+                sub_y = mouse_pos[1] - y
+                angle = math.degrees(math.atan2(sub_x, sub_y))
+                self.rect.x = x
+                self.rect.y = y
+                while 0 < self.rect.x < 640 and 0 < self.rect.y < 480:
+                    self.rect.x += math.sin(angle) * 5
+                    self.rect.y += math.cos(angle) * 5
 
 
 def main():
@@ -99,7 +104,7 @@ def main():
         px, py = move(1, px, py)
         spin_surface = aim(px, py)
         screen.blit(spin_surface, (px, py))
-        Testbullet.shoot()
+        Testbullet.shoot(px,py)
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:

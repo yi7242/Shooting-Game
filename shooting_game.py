@@ -67,7 +67,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def __init__(self, x, y, bullet_speed=10):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((1, 5))
+        self.image = pygame.Surface((10, 10))
         self.image.fill((255, 0, 0))
         width = self.image.get_width()
         height = self.image.get_height()
@@ -105,6 +105,7 @@ def main():
         spin_surface = aim(px, py)
         screen.blit(spin_surface, (px, py))
         Testbullet.shoot(px,py)
+        Testbullet.draw()
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:

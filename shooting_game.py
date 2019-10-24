@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import sys
 import math
+import random
 
 pygame.init()  # 初期化
 screen = pygame.display.set_mode((1200, 600))
@@ -11,16 +12,28 @@ background.fill((255, 255, 255))
 screen.blit(background, (0, 0))
 background = background.convert()
 
+score = 0
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self, self.containers)
+        pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("playerpic.png").convert_alpha()
         width = self.image.get_width()
         height = self.image.get_height()
         self.rect = Rect(x, y, width, height)
+        self.reload_timer = 0
     def update(self):
         speed = 5
+        reload_time = 5
         keys = pygame.key.get_pressed()
+
+        mouse_pos = pygame.mouse.get_pos()
+        sub_x = mouse_pos[0] - self.rect.x
+        sub_y = mouse_pos[1] - self.rect.y
+        angle = math.atan2(sub_x, sub_y)
+
+        self.surf = pygame.transform.rotate(self.image, math.degrees(angle)+180)
+
         if keys[K_UP] or keys[K_w]:
             self.rect.y -= speed
         if keys[K_DOWN] or keys[K_s]:
@@ -29,7 +42,20 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += speed
         if keys[K_LEFT] or keys[K_a]:
             self.rect.x -= speed
+        mouse_pressed = pygame.mouse.get_pressed()
+        if self.reload_timer > 0:
+            self.reload_timer -= 1
+        if mouse_pressed[0]:
+            if self.reload_timer <= 0:
+                Bullet(self.rect.center)
+                self.reload_timer = reload_time
         self.rect.clamp_ip(screen.get_rect())
+    def draw(self):
+        screen.blit(self.surf, self.rect)
+    def pos(self):
+        return (self.rect.x, self.rect.y)
+
+
 
 
 
@@ -38,12 +64,13 @@ class Player(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
 
     def __init__(self, x, y, health=100):
-        pygame.sprite.Sprite.__init__(self)
+        pygame.sprite.Sprite.__init__(self,self.containers)
         self.image = pygame.Surface((10, 10))
-        self.image.fill((255, 255, 0))
+        self.image.fill((0, 0, 255))
         width = self.image.get_width()
         height = self.image.get_height()
         self.rect = pygame.Rect(x, y, width, height)
+        self.rect.clamp_ip(screen.get_rect())
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -51,46 +78,78 @@ class Enemy(pygame.sprite.Sprite):
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self, x, y):
+    def __init__(self,pos):
         bullet_speed = 5
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((10, 10))
+        pygame.sprite.Sprite.__init__(self,self.containers)
+        self.image = pygame.Surface((4, 4))
         self.image.fill((255, 0, 0))
-        width = self.image.get_width()
-        height = self.image.get_height()
-        self.rect = pygame.Rect(x, y, width, height)
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.mouse_pos = pygame.mouse.get_pos()
+
+
 
     def draw(self):  # デバッグ用
         screen.blit(self.image, self.rect)
 
     def update(self, x, y):
-        mouse_pressed = pygame.mouse.get_pressed()#TODO mouse pressedをmain側で処理
-        if mouse_pressed[0]:
-            speed = 10
-            mouse_pos = pygame.mouse.get_pos()
-            sub_x = mouse_pos[0] - x
-            sub_y = mouse_pos[1] - y
-            angle = math.degrees(math.atan2(sub_x, sub_y))
-            self.rect.x += math.sin(angle) * speed
-            self.rect.y += math.cos(angle) * speed
+        speed = 10
+        mouse_pos = pygame.mouse.get_pos()
+        sub_x = self.mouse_pos[0] - x
+        sub_y = self.mouse_pos[1] - y
+        angle = math.atan2(sub_x, sub_y)
+        self.rect.x += math.sin(angle) * speed
+        self.rect.y += math.cos(angle) * speed
+        if screen.get_rect().contains(self.rect):
+            pass
+        else:
+            self.kill()
 
+def collision_detection(bullet, enemy):
+    collision = pygame.sprite.groupcollide(bullet, enemy, True, True)
+    #score += 1
 
 
 def main():
     pygame.display.set_caption("ShootingGame")  # 初期設定
     loop = True
-    all = pygame.sprite.RenderUpdates()
-    Player.containers = all
-    Player(screen.get_rect().centerx, screen.get_rect().centery)
 
-    Enemy1 = Enemy(100, 100, 10)
-    px = 0
-    py = 0
+    enemy = pygame.sprite.Group()
+    bullets = pygame.sprite.Group()
+
+    all = pygame.sprite.RenderUpdates()
+    Bullet.containers = bullets
+    Enemy.containers = enemy
+
+    Player1 = Player(screen.get_rect().centerx, screen.get_rect().centery)
+
+    timer = pygame.time.get_ticks()
     while loop:
         screen.blit(background, (0, 0))
-        all.update()
-        all.draw(screen)
-        Enemy1.draw()
+        timer2 = pygame.time.get_ticks()
+        yoko = screen.get_width()
+        tate = screen.get_height()
+        if timer2 - timer >= 3000:
+            timer = timer2
+            rand = random.randint(1,4)
+            if rand == 1:
+                Enemy(random.randint(0, yoko) ,0)
+            elif rand == 2:
+                Enemy(yoko, random.randint(0, tate))
+            elif rand == 3:
+                Enemy(random.randint(0, yoko), tate)
+            elif rand == 4:
+                Enemy(0, random.randint(0, tate))
+        player_pos = Player1.pos()
+        enemy.update()
+        bullets.update(player_pos[0], player_pos[1])
+        Player1.update()
+
+        Player1.draw()
+        enemy.draw(screen)
+        bullets.draw(screen)
+
+        collision_detection(bullets, enemy)
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -106,3 +165,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+#TODO 敵がプレイヤーに近づくようにする
+#TODO collision 判定でスコア+=1でself.kill()
+#TODO スコア等フォントで表示
+#TODO 背景の変化
+#TODO　スコアの表示の仕方を多少変える
+#TODO　敵やプレイヤーの描写をかっこよく
+#TODO 斜め方向に進む際1.414の考慮
+#TODO 敵が自分に当たったらゲームオーバー

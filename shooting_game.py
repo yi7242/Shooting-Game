@@ -14,6 +14,7 @@ background = background.convert()
 
 score = 0
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -22,8 +23,9 @@ class Player(pygame.sprite.Sprite):
         height = self.image.get_height()
         self.rect = Rect(x, y, width, height)
         self.reload_timer = 0
+
     def update(self):
-        speed = 5
+        speed = 1
         reload_time = 5
         keys = pygame.key.get_pressed()
 
@@ -32,16 +34,16 @@ class Player(pygame.sprite.Sprite):
         sub_y = mouse_pos[1] - self.rect.y
         angle = math.atan2(sub_x, sub_y)
 
-        self.surf = pygame.transform.rotate(self.image, math.degrees(angle)+180)
-
-        if keys[K_UP] or keys[K_w]:
-            self.rect.y -= speed
-        if keys[K_DOWN] or keys[K_s]:
+        self.surf = pygame.transform.rotate(self.image, math.degrees(angle) + float(180))
+        if keys[K_s]:
             self.rect.y += speed
-        if keys[K_RIGHT] or keys[K_d]:
+        if keys[K_d]:
             self.rect.x += speed
-        if keys[K_LEFT] or keys[K_a]:
+        if keys[K_a]:
             self.rect.x -= speed
+        if keys[K_w]:
+            self.rect.y -= speed
+
         mouse_pressed = pygame.mouse.get_pressed()
         if self.reload_timer > 0:
             self.reload_timer -= 1
@@ -50,21 +52,18 @@ class Player(pygame.sprite.Sprite):
                 Bullet(self.rect.center)
                 self.reload_timer = reload_time
         self.rect.clamp_ip(screen.get_rect())
+
     def draw(self):
         screen.blit(self.surf, self.rect)
+
     def pos(self):
-        return (self.rect.x, self.rect.y)
-
-
-
-
-
+        return self.rect.x, self.rect.y
 
 
 class Enemy(pygame.sprite.Sprite):
 
     def __init__(self, x, y, health=100):
-        pygame.sprite.Sprite.__init__(self,self.containers)
+        pygame.sprite.Sprite.__init__(self, self.containers)
         self.image = pygame.Surface((10, 10))
         self.image.fill((0, 0, 255))
         width = self.image.get_width()
@@ -75,19 +74,28 @@ class Enemy(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.image, self.rect)
 
+    def update(self, x, y):
+        speed = 1
+        sub_x = self.rect.x - x
+        sub_y = self.rect.y - y
+        angle = math.atan2(sub_x, sub_y)
+        print(angle)
+        self.rect.x += math.sinmath.degees(angle) * speed
+        self.rect.y += math.cos(angle) * speed
+        self.rect.clamp_ip(screen.get_rect())
+
+
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self,pos):
+    def __init__(self, pos):
         bullet_speed = 5
-        pygame.sprite.Sprite.__init__(self,self.containers)
+        pygame.sprite.Sprite.__init__(self, self.containers)
         self.image = pygame.Surface((4, 4))
         self.image.fill((255, 0, 0))
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.mouse_pos = pygame.mouse.get_pos()
-
-
 
     def draw(self):  # デバッグ用
         screen.blit(self.image, self.rect)
@@ -105,9 +113,10 @@ class Bullet(pygame.sprite.Sprite):
         else:
             self.kill()
 
+
 def collision_detection(bullet, enemy):
     collision = pygame.sprite.groupcollide(bullet, enemy, True, True)
-    #score += 1
+    # score += 1
 
 
 def main():
@@ -117,7 +126,6 @@ def main():
     enemy = pygame.sprite.Group()
     bullets = pygame.sprite.Group()
 
-    all = pygame.sprite.RenderUpdates()
     Bullet.containers = bullets
     Enemy.containers = enemy
 
@@ -131,9 +139,9 @@ def main():
         tate = screen.get_height()
         if timer2 - timer >= 3000:
             timer = timer2
-            rand = random.randint(1,4)
+            rand = random.randint(1, 4)
             if rand == 1:
-                Enemy(random.randint(0, yoko) ,0)
+                Enemy(random.randint(0, yoko), 0)
             elif rand == 2:
                 Enemy(yoko, random.randint(0, tate))
             elif rand == 3:
@@ -141,7 +149,7 @@ def main():
             elif rand == 4:
                 Enemy(0, random.randint(0, tate))
         player_pos = Player1.pos()
-        enemy.update()
+        enemy.update(player_pos[0], player_pos[1])
         bullets.update(player_pos[0], player_pos[1])
         Player1.update()
 
@@ -165,11 +173,9 @@ def main():
 
 if __name__ == "__main__":
     main()
-#TODO 敵がプレイヤーに近づくようにする
-#TODO collision 判定でスコア+=1でself.kill()
-#TODO スコア等フォントで表示
-#TODO 背景の変化
-#TODO　スコアの表示の仕方を多少変える
-#TODO　敵やプレイヤーの描写をかっこよく
-#TODO 斜め方向に進む際1.414の考慮
-#TODO 敵が自分に当たったらゲームオーバー
+# TODO 敵がプレイヤーに近づくようにする
+# TODO スコア等フォントで表示
+# TODO 背景の変化
+# TODO　スコアの表示の仕方を多少変える
+# TODO　敵やプレイヤーの描写をかっこよく
+# TODO 敵が自分に当たったらゲームオーバー

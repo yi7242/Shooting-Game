@@ -3,6 +3,7 @@ from pygame.locals import *
 import sys
 import math
 import random
+import time
 
 pygame.init()  # 初期化
 screen = pygame.display.set_mode((1200, 600))
@@ -11,7 +12,6 @@ background = pygame.Surface(screen.get_size())
 background.fill((255, 255, 255))
 screen.blit(background, (0, 0))
 background = background.convert()
-
 score = 0
 
 
@@ -71,18 +71,23 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = pygame.Rect(x, y, width, height)
         self.rect.clamp_ip(screen.get_rect())
 
+
     def draw(self):
         screen.blit(self.image, self.rect)
 
     def update(self, x, y):
         speed = 1
-        sub_x = self.rect.x - x
-        sub_y = self.rect.y - y
-        angle = math.atan2(sub_x, sub_y)
+        sub_x = x - self.rect.x
+        sub_y = y - self.rect.y
+        """angle = math.atan2(sub_x, sub_y)
         print(angle)
-        self.rect.x += math.sinmath.degees(angle) * speed
+        self.rect.x += math.sin(angle) * speed
         self.rect.y += math.cos(angle) * speed
-        self.rect.clamp_ip(screen.get_rect())
+        self.rect.clamp_ip(screen.get_rect())"""
+        length = math.sqrt(sub_x**2 + sub_y**2)
+        if length != 0:
+            self.rect.x += sub_x/length
+            self.rect.y += sub_y/length
 
 
 
@@ -114,14 +119,26 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 
-def collision_detection(bullet, enemy):
-    collision = pygame.sprite.groupcollide(bullet, enemy, True, True)
-    # score += 1
+def collision_detection(bullet, enemy,player, score):
+    player_collision = pygame.sprite.groupcollide(bullet, enemy, True, True)
+    enemy_collision = pygame.sprite.spritecollide(player, enemy,True)
+    local_score = score
+    if player_collision:
+        local_score += 1
+    if enemy_collision:
+        return "stop"
+    return local_score
 
 
 def main():
     pygame.display.set_caption("ShootingGame")  # 初期設定
     loop = True
+
+    hoge = 0
+
+    score = 0
+    start = True
+    scorefont = pygame.font.SysFont(None, 80)
 
     enemy = pygame.sprite.Group()
     bullets = pygame.sprite.Group()
@@ -133,31 +150,44 @@ def main():
 
     timer = pygame.time.get_ticks()
     while loop:
-        screen.blit(background, (0, 0))
-        timer2 = pygame.time.get_ticks()
-        yoko = screen.get_width()
-        tate = screen.get_height()
-        if timer2 - timer >= 3000:
-            timer = timer2
-            rand = random.randint(1, 4)
-            if rand == 1:
-                Enemy(random.randint(0, yoko), 0)
-            elif rand == 2:
-                Enemy(yoko, random.randint(0, tate))
-            elif rand == 3:
-                Enemy(random.randint(0, yoko), tate)
-            elif rand == 4:
-                Enemy(0, random.randint(0, tate))
-        player_pos = Player1.pos()
-        enemy.update(player_pos[0], player_pos[1])
-        bullets.update(player_pos[0], player_pos[1])
-        Player1.update()
+        if start:
+            screen.blit(background, (0, 0))
+            timer2 = pygame.time.get_ticks()
+            yoko = screen.get_width()
+            tate = screen.get_height()
+            if timer2 - timer >= 3000:
+                timer = timer2
+                rand = random.randint(1, 4)
+                if rand == 1:
+                    Enemy(random.randint(0, yoko), 0)
+                elif rand == 2:
+                    Enemy(yoko, random.randint(0, tate))
+                elif rand == 3:
+                    Enemy(random.randint(0, yoko), tate)
+                elif rand == 4:
+                    Enemy(0, random.randint(0, tate))
+            player_pos = Player1.pos()
+            enemy.update(player_pos[0], player_pos[1])
+            bullets.update(player_pos[0], player_pos[1])
+            Player1.update()
 
-        Player1.draw()
-        enemy.draw(screen)
-        bullets.draw(screen)
+            Player1.draw()
+            enemy.draw(screen)
+            bullets.draw(screen)
 
-        collision_detection(bullets, enemy)
+        hoge = collision_detection(bullets, enemy, Player1, score)
+        if hoge == "stop":
+            start = False
+            background.fill((0,0,0))
+            screen.blit(background, (0, 0))
+            scoresurf = scorefont.render("Your Score " + str(score), True, (255, 255, 255), (0, 0, 0))
+            screen.blit(scoresurf, (screen.get_rect().centerx-scoresurf.get_rect().centerx, screen.get_rect().centery-scoresurf.get_rect().centery))
+
+        else:
+            score = hoge
+            scoresurf = scorefont.render(str(score), True, (0, 0, 0), (255, 255, 255))
+        if start:
+            screen.blit(scoresurf, (10,10))
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -173,8 +203,9 @@ def main():
 
 if __name__ == "__main__":
     main()
-# TODO 敵がプレイヤーに近づくようにする
-# TODO スコア等フォントで表示
+
+
+
 # TODO 背景の変化
 # TODO　スコアの表示の仕方を多少変える
 # TODO　敵やプレイヤーの描写をかっこよく

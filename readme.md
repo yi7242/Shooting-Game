@@ -6,6 +6,6 @@
 - Python
 - Pygame
 
-## 操作方法
-WASDで移動
-クリックで発射
+## プレイ方法
+shooting_game.pyを実行することでプレイできます。
+WASDで移動、クリックで発射
